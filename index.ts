@@ -111,13 +111,13 @@ const pad = (num: number): string => {
 };
 
 class AudioRecorderPlayer {
-  private _isRecording: boolean;
-  private _recordingPaused: boolean;
-  private _isPlaying: boolean;
-  private _playbackPaused: boolean;
-  private _recorderSubscription: EmitterSubscription;
-  private _playerSubscription: EmitterSubscription;
-  private _recordInterval: number;
+  private _isRecording: boolean = false;
+  private _recordingPaused: boolean = false;
+  private _isPlaying: boolean = false;
+  private _playbackPaused: boolean = false;
+  private _recorderSubscription: EmitterSubscription | null = null;
+  private _playerSubscription: EmitterSubscription | null = null;
+  private _recordInterval: number | null = null;
 
   mmss = (secs: number): string => {
     let minutes = Math.floor(secs / 60);
@@ -140,7 +140,7 @@ class AudioRecorderPlayer {
    * set listerner from native module for recorder.
    * @returns {callBack(e: any)}
    */
-  addRecordBackListener = (e): void => {
+  addRecordBackListener = (e: any): void => {
     if (Platform.OS === 'android') {
       this._recorderSubscription = DeviceEventEmitter.addListener(
         'rn-recordback',
@@ -167,7 +167,7 @@ class AudioRecorderPlayer {
    * set listener from native module for player.
    * @returns {callBack(e: Event)}
    */
-  addPlayBackListener = (e): void => {
+  addPlayBackListener = (e: any): void => {
     if (Platform.OS === 'android') {
       this._playerSubscription = DeviceEventEmitter.addListener(
         'rn-playback',
@@ -264,7 +264,7 @@ class AudioRecorderPlayer {
    * @returns {Promise<string>}
    */
 
-  startPlayer = async ({ uri = 'DEFAULT', meteringEnabled = true }: StartPlayerParams = {}): Promise<string> => {
+  startPlayer = async ({ uri = 'DEFAULT', meteringEnabled = true }: StartPlayerParams = {}): Promise<string | undefined> => {
     if (!this._isPlaying || this._playbackPaused) {
       this._isPlaying = true;
       this._playbackPaused = false;
@@ -289,7 +289,7 @@ class AudioRecorderPlayer {
    * pause playing.
    * @returns {Promise<string>}
    */
-  pausePlayer = async (): Promise<string> => {
+  pausePlayer = async (): Promise<string | undefined> => {
     if (!this._isPlaying) return 'No audio playing';
     if (!this._playbackPaused) {
       this._playbackPaused = true;
